@@ -38,6 +38,14 @@ class User < ApplicationRecord
     UserMailer.account_activation(self).deliver_now
   end
 
+    #トークンがダイジェストと一致したらtrueを返す
+    def authenticated?(attribute, token)
+      digest = send("#{attribute}_digest") 
+      return false if digest.nil?
+      BCrypt::Password.new(digest).is_password?(token)
+  
+    end
+
   private
 
   # メールアドレスをすべて小文字にする
@@ -51,11 +59,11 @@ class User < ApplicationRecord
     self.activation_digest = User.digest(activation_token)
   end
 
-  #トークンがダイジェストと一致したらtrueを返す
-  def authenticated?(attribute, token)
-    digest = send("#{attribute}_digest") 
-    return false if digest.nil?
-    BCrypt::Password.new(digest).is_password?(token)
+  # #トークンがダイジェストと一致したらtrueを返す
+  # def authenticated?(attribute, token)
+  #   digest = send("#{attribute}_digest") 
+  #   return false if digest.nil?
+  #   BCrypt::Password.new(digest).is_password?(token)
 
-  end
+  # end
 end
