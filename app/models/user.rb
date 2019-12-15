@@ -1,4 +1,5 @@
 class User < ApplicationRecord
+  has_many :microposts, dependent: :destroy
   attr_accessor :remember_token, :activation_token
   # attr_accessor :activation_token
   before_save :downcase_email
@@ -38,13 +39,24 @@ class User < ApplicationRecord
     UserMailer.account_activation(self).deliver_now
   end
 
-    #トークンがダイジェストと一致したらtrueを返す
-    def authenticated?(attribute, token)
-      digest = send("#{attribute}_digest") 
-      return false if digest.nil?
-      BCrypt::Password.new(digest).is_password?(token)
-  
-    end
+  # トークンがダイジェストと一致したらtrueを返す
+  def authenticated?(attribute, token)
+  # def authenticated?(remember_token)11章で書き換えた
+    digest = send("#{attribute}_digest") 
+    return false if digest.nil?
+    BCrypt::Password.new(digest).is_password?(token)
+  end
+
+  # ユーザーのログイン情報を破棄する
+  def forget
+    update_attribute(:remember_digest, nil)
+  end
+
+#試作feedの定義
+#完全な実装は次章の「ユーザーをフォローする」を参照
+  def feed
+    Micropost.where("user_id =?", id)
+  end  
 
   private
 
